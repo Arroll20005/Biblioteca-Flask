@@ -1,10 +1,44 @@
 
-<form action="/" method="POST">
-<input type="text" name="nombre" placeholder="Ingrese el nombre del usuario"> </input>
-<input type="text" name="apellido" placeholder="Ingrese el apellido del usuario"> </input>
-<input type="text" name="telefono" placeholder="Ingrese el telefono del usuario"> </input>
-<input type="text" name="email" placeholder="Ingrese el email del usuario"> </input>
+{% with messages = get_flashed_messages() %}
+{% if messages %}
+{% for message in messages %}
+    <p>{{message}} </p>
+{% endfor %}
+{% endif %}
+{% endwith %}
 
-
-
+<form action="/add_usuario" method="POST" >
+    <input type="text" name="nombre" placeholder="Ingrese el nombre del usuario"> </input>
+    <input type="text" name="apellido" placeholder="Ingrese el apellido del usuario"> </input>
+    <input type="text" name="email" placeholder="Ingrese el email del usuario"> </input>
+    <button type="submit">
+        Save
+    </button>
 </form>
+
+<table>
+    <thead>
+        <tr>
+            <td>Nombre</td>
+            <td>Apellido</td>
+            <td>Email</td>
+            <td>Operaciones</td>
+            
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in usuario %}
+        <tr>
+            <td> {{user.1}} </td>
+            <td> {{user.2}} </td>
+            <td> {{user.3}} </td>
+            <td>
+                <a href="/edit/{{ user.0 }}"> Editar</a>
+                <a href="/delete/{{ user.0 }}"> Eliminar</a>
+
+            </td>
+
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
