@@ -24,21 +24,24 @@ def index():
 @app.route('/add_usuario', methods=['POST'])
 def add_usuario():
     if request.method == 'POST':
-        nombre = request.form['nombre']
-        apellido = request.form['apellido']
-        email = request.form['email']
+        nombre = request.form['nombre'].strip()
+        apellido = request.form['apellido'].strip()
+        email = request.form['email'].strip()
+        if not nombre or not apellido or not email:
+            flash('Todos los campos son obligatorios')
+            return redirect(url_for('index'))
+
         cur = mysql.connection.cursor()
         cur.execute('insert into usuario (nombre, apellido, email) values (%s, %s, %s)', (nombre, apellido, email))
         mysql.connection.commit()
         flash('Usuario agregado correctamente')
-
         
         return redirect(url_for('index'))
         
 @app.route('/edit/<id>')
 def get_usuario(id):
     cur = mysql.connection.cursor()
-    cur.execute('select * from usuario where usuario_id = %s', (id))
+    cur.execute('select * from usuario where usuario_id = %s', (id,))
     data = cur.fetchall()
 
     return render_template('edit-usuario.html', usuario = data[0])
@@ -46,9 +49,12 @@ def get_usuario(id):
 @app.route('/update/<id>', methods = ['POST'])
 def update_usuario(id):
     if request.method == 'POST':
-        nombre = request.form['nombre']
-        apellido = request.form['apellido']
-        email = request.form['email']
+        nombre = request.form['nombre'].strip()
+        apellido = request.form['apellido'].strip()
+        email = request.form['email'].strip()
+        if not nombre or not apellido or not email:
+            flash('Todos los campos son obligatorios')
+            return redirect(url_for('index'))
 
         cur = mysql.connection.cursor()
         cur.execute("""
@@ -67,36 +73,10 @@ def update_usuario(id):
 @app.route('/delete/<string:id>')
 def delete_usuario(id): 
     cur = mysql.connection.cursor()
-    cur.execute('delete from usuario where usuario_id = {0}'.format(id))
+    cur.execute('delete from usuario where usuario_id = %s', (id,))
     mysql.connection.commit()
     flash('Usuario eliminado correctamente')
     return redirect(url_for('index'))
-
-"""
-
-@app.route('/update-autor')
-def add_book():
-    return 'book'
-
-@app.route('/delete-autor')
-def add_book():
-    return 'book'
-
-
-
-
-@app.route('/add-book')
-def add_book():
-    return 'book'
-
-@app.route('/update-book')
-def add_book():
-    return 'book'
-
-@app.route('/delete-book')
-def add_book():
-    return 'book'
-"""
 
 
 if __name__ == '__main__': 
