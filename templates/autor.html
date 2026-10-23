@@ -1,0 +1,69 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+
+<div class="row">
+    <div class="col-md-5">
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-dismissible alert-success">
+            <button type="button" class="btn-close" data-bs-dismiss="alert">
+            </button>
+            {{message}}
+
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="card card-body">
+            <form action="/add_autor" method="POST">
+                <div class="form-group">
+                    <input type="text" name="nombre" required placeholder="Ingrese el nombre del autor"
+                        class="form-control">
+                    <input type="text" name="apellido" required placeholder="Ingrese el apellido del autor"
+                        class="form-control">
+                    <input type="text" name="nacionalidad" required placeholder="Ingrese la nacionalidad del autor"
+                        class="form-control">
+                </div>
+                <div class="form-group text-center">
+                    <button type="submit" class="btn btn-primary w-100">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <table class="table table-striped table-bordered bg-white table-sm">
+            <thead>
+                <tr>
+                    <td>Nombre</td>
+                    <td>Apellido</td>
+                    <td>Nacionalidad</td>
+                    <td>Operaciones</td>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in autor %}
+                <tr>
+                    <td> {{a.1}} </td>
+                    <td> {{a.2}} </td>
+                    <td> {{a.3}} </td>
+                    <td>
+                        <a href="/edit_autor/{{ a.0 }}" class="btn btn-secondary"> Editar</a>
+                        <a href="/delete_autor/{{ a.0 }}" class="btn btn-danger btn-delete"> Eliminar</a>
+
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+
+
+{% endblock %}
