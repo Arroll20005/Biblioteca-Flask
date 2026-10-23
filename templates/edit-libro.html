@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="col-md-4 offset-md-4">
+    <div class="card card-body">
+        <h3 class="text-center">
+                Actualizar Libro
+            </h3>
+            <hr>
+        <form action="/update_libro/{{libro.0}}" method="POST">
+            <div class="form-group">
+                <input type="text" name="titulo" required placeholder="titulo" value="{{ libro.1 }}"
+                    class="form-control">
+                <input type="number" name="anio_publicacion" required placeholder="año" value="{{ libro.2 }}"
+                    class="form-control mb-3">
+
+            </div>
+            <div class="form-group">
+                <select name="autor_id" class="form-control mb-3">
+                    {% for a in autor %}
+                    <option value="{{ a.0 }}" {% if a.0==libro.3 %} selected {% endif %}>
+                        {{ a.1 }} {{ a.2 }}
+                    </option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="form-group">
+                <button type="submit" class="btn btn-success w-100 mt-3">
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, url_for, redirect, flash
 from flask_mysqldb import MySQL
+from MySQLdb import DataError
 
 
 
@@ -14,6 +15,16 @@ mysql= MySQL(app)
 # seetings
 app.secret_key = 'mysecretkey'
 
+# Temporal 
+# Muestra tabla usuario hasta crear la vista principal
+@app.route('/')
+def index():
+    cur = mysql.connection.cursor()
+    cur.execute('select * from usuario')
+    data = cur.fetchall()
+    return render_template('usuario.html', usuario = data)
+
+# Tabla Usuario
 @app.route('/usuario')
 def indexusuario():
     cur = mysql.connection.cursor()
@@ -136,6 +147,92 @@ def delete_autor(id):
     mysql.connection.commit()
     flash('Autor eliminado correctamente')
     return redirect(url_for('indexautor'))
+
+@app.route('/libro')
+def indexlibro():
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        select l.libro_id,
+            l.titulo,
+            l.anio_publicacion,
+            a.nombre,
+            a.apellido
+        from libro l
+        inner join autor a
+            on l.autor_id = a.autor_id
+    """)
+    datalibro = cur.fetchall()
+
+    cur.execute("""
+        select autor_id,
+            nombre,
+            apellido
+        from autor
+    """)
+    dataautor = cur.fetchall()
+    return render_template('libro.html', libro = datalibro, autor = dataautor)
+
+@app.route('/add_libro', methods=['POST'])
+def add_libro():
+    titulo = request.form['titulo'].strip()
+    anio_publicacion = request.form['anio_publicacion'].strip()
+    autor_id = request.form['autor_id'].strip()
+    if not titulo or not anio_publicacion or not autor_id:
+        flash('Todos los campos son obligatorios')
+        return redirect(url_for('indexlibro'))
+    # Controlardor de error para año ingresado
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute('insert into libro (titulo, anio_publicacion, autor_id) values (%s, %s, %s)', (titulo, anio_publicacion, autor_id))
+        mysql.connection.commit()
+        flash('Libro agregado correctamente', 'success')
+    except DataError:
+        flash('El año ingresado no es válido', 'danger')
+    
+    return redirect(url_for('indexlibro'))
+
+@app.route('/edit_libro/<id>')
+def get_libro(id):
+    cur = mysql.connection.cursor()
+    cur.execute('select * from libro where libro_id =%s', (id,))
+    datalibro = cur.fetchone()
+    cur.execute('select * from autor')
+    dataautor = cur.fetchall()
+
+    return render_template('edit-libro.html', libro = datalibro, autor = dataautor)
+
+@app.route('/update_libro/<id>', methods = ['POST'])
+def update_libro(id):
+    titulo = request.form['titulo'].strip()
+    anio_publicacion = request.form['anio_publicacion'].strip()
+    autor_id = request.form['autor_id'].strip()
+    if not titulo or not anio_publicacion or not autor_id:
+        flash('Todos los campos son obligatorios')
+        return redirect(url_for('indexlibro'))
+    # Controlardor de error para año ingresado
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            update libro
+            set titulo = %s, 
+                anio_publicacion = %s,
+                autor_id = %s
+            where libro_id = %s
+        """, (titulo, anio_publicacion, autor_id, id))
+        mysql.connection.commit()
+        flash('Libro actualizado correctamente', 'success')
+    except DataError:
+        flash('El año ingresado no es valido', 'danger')
+    return redirect(url_for('indexlibro'))
+
+@app.route('/delete_libro/<string:id>')
+def delete_libro(id):
+    cur = mysql.connection.cursor()
+    cur.execute('delete from libro where libro_id = %s', (id,))
+    mysql.connection.commit()
+    flash('Libro eliminado correctamente', 'success')
+    return redirect(url_for('indexlibro'))
+
 
 
 

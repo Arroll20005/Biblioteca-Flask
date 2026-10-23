@@ -1,0 +1,76 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="row">
+    <div class="col-md-5">
+        {% with messages = get_flashed_messages(with_categories = true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show">
+            <button type="button" class="btn-close" data-bs-dismiss="alert">
+            </button>
+            {{message}}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="card card-body">
+            <h3 class="text-center">
+                Registro de Libro
+            </h3>
+            <hr>
+            <form action="/add_libro" method="POST">
+                <div class="form-group">
+                    <input type="text" name="titulo" required placeholder="Ingrese el titulo del libro"
+                        class="form-control mb-2">
+                    <input type="number" name="anio_publicacion" required placeholder="Ingrese el año de publicacion"
+                        class="form-control mb-2">
+                    <select name="autor_id" class="form-control mb-2" required> <option value="">
+                        Seleccione un autor
+                    </option>
+                    {% for a in autor %}
+                        <option value="{{ a.0 }}">
+                            {{ a.1 }} {{ a.2 }}
+                        </option>
+                    {% endfor %}
+                    </select>
+                </div>
+                <div class="form-group text-center">
+                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <table class="table table-striped table-bordered bg-white table-sm">
+            <thead>
+                <tr>
+                    <td>Titulo</td>
+                    <td>Año</td>
+                    <td>Autor</td>
+                    <td>Operaciones</td>
+
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in libro %}
+                <tr>
+                    <td> {{a.1}} </td>
+                    <td> {{a.2}} </td>
+                    <td> {{a.3}} {{ a.4 }} </td>
+                    <td class="text-center">
+                        <a href="/edit_libro/{{ a.0 }}" class="btn btn-secondary m-2"> Editar</a>
+                        <a href="/delete_libro/{{ a.0 }}" class="btn btn-danger btn-delete"> Eliminar</a>
+
+                    </td>
+
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+
+{% endblock %}
