@@ -1,0 +1,87 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="row">
+    <div class="col-md-5">
+        {% with messages = get_flashed_messages(with_categories = true) %}
+        {% if messages %}
+        {% for category, message in messages %}
+        <div class="alert alert-{{ category }} alert-dismissible fade show">
+            <button type="button" class="btn-close" data-bs-dismiss="alert">
+            </button>
+            {{message}}
+        </div>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <div class="card card-body">
+            <h3 class="text-center">
+                Registro de Ejemplar
+            </h3>
+            <hr>
+            <form action="/add_ejemplar" method="POST">
+                <div class="form-group">
+                    <select id="libro_id" name="libro_id" class="form-control mb-3" required>
+                        <option value="">
+                            Seleccione un libro
+                        </option>
+                        {% for a in libro %}
+                        <option value="{{ a.0 }}">
+                            {{ a.1 }}
+                        </option>
+                        {% endfor %}
+                    </select>
+                    <label class="form-label">
+                        Próxima copia a resgistrar
+                    </label>
+                    <input type="text" id="siguiente_copia" class="form-control mb-3" value="Seleccione un libro"
+                        readonly>
+                </div>
+                <div class="form-group text-center">
+                    <button type="submit" class="btn btn-primary w-100 mt-3">
+                        Save
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+    <div class="col-md-7">
+        <table class="table table-striped table-bordered bg-white table-sm">
+            <thead>
+                <tr>
+                    <td>
+                        Libro
+                    </td>
+                    <td>
+                        # de copia
+                    </td>
+                    <td>
+                        Estado
+                    </td>
+                    <td>
+                        Operaciones
+                    </td>
+                </tr>
+            </thead>
+            <tbody>
+                {% for a in ejemplar %}
+                <tr>
+                    <td> {{a.1}} </td>
+                    <td> {{a.2}} </td>
+                    <td> {{a.3}} </td>
+                    <td class="text-center">
+                        <a href="/edit_ejemplar/{{ a.0 }}" class="btn btn-secondary mb-2">
+                            Editar
+                        </a>
+                        <a href="/delete_ejemplar/{{ a.0 }}" class="btn btn-danger btn-delete">
+                            Eliminar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+</div>
+{% endblock %}

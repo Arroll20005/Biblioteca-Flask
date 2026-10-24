@@ -24,6 +24,7 @@ def index():
     data = cur.fetchall()
     return render_template('usuario.html', usuario = data)
 
+# ------------------------------------------------------------------------------------------------
 # Tabla Usuario
 @app.route('/usuario')
 def indexusuario():
@@ -32,6 +33,7 @@ def indexusuario():
     data = cur.fetchall()
     return render_template('usuario.html', usuario = data)
 
+# AGREGA USUARIO
 @app.route('/add_usuario', methods=['POST'])
 def add_usuario():
     if request.method == 'POST':
@@ -50,7 +52,8 @@ def add_usuario():
         flash('Usuario agregado correctamente')
         
         return redirect(url_for('indexusuario'))
-        
+
+# EXTRAE DATOS DE USUARIO
 @app.route('/edit_usuario/<id>')
 def get_usuario(id):
     cur = mysql.connection.cursor()
@@ -59,6 +62,7 @@ def get_usuario(id):
 
     return render_template('edit-usuario.html', usuario = data[0])
 
+# ACTUALIZA DATOS DE USUARIO
 @app.route('/update_usuario/<id>', methods = ['POST'])
 def update_usuario(id):
     if request.method == 'POST':
@@ -81,7 +85,7 @@ def update_usuario(id):
         flash('Usuario actualizado correctamente')
         return redirect(url_for('indexusuario'))
 
-
+# ELIMINA USUARIO
 @app.route('/delete_usuario/<string:id>')
 def delete_usuario(id): 
     cur = mysql.connection.cursor()
@@ -90,6 +94,8 @@ def delete_usuario(id):
     flash('Usuario eliminado correctamente')
     return redirect(url_for('indexusuario'))
 
+# ------------------------------------------------------------------------------------------------
+# TABLA AUTOR
 @app.route('/autor')
 def indexautor():
     cur = mysql.connection.cursor()
@@ -97,6 +103,7 @@ def indexautor():
     data = cur.fetchall()
     return render_template('autor.html', autor = data)
 
+# AGREGA AUTOR
 @app.route('/add_autor', methods=['POST'])
 def add_autor():
         nombre = request.form['nombre'].strip()
@@ -112,6 +119,7 @@ def add_autor():
         flash('Autor agregado correctamente')
         return redirect(url_for('indexautor'))
 
+# EXTRAE DATOS DE AUTOR
 @app.route('/edit_autor/<id>')
 def get_autor(id):
     cur = mysql.connection.cursor()
@@ -119,6 +127,7 @@ def get_autor(id):
     data = cur.fetchall()
     return render_template('edit-autor.html', autor = data[0])
 
+# ACTUALIZA AUTOR
 @app.route('/update_autor/<id>', methods = ['POST'])
 def update_autor(id):
     nombre = request.form['nombre'].strip()
@@ -140,6 +149,7 @@ def update_autor(id):
     flash('Autor actualizado correctamente')
     return redirect(url_for('indexautor'))
 
+# ELIMINA AUTOR
 @app.route('/delete_autor/<string:id>')
 def delete_autor(id):
     cur = mysql.connection.cursor()
@@ -148,6 +158,8 @@ def delete_autor(id):
     flash('Autor eliminado correctamente')
     return redirect(url_for('indexautor'))
 
+# ------------------------------------------------------------------------------------------------
+# TABLA LIBRO
 @app.route('/libro')
 def indexlibro():
     cur = mysql.connection.cursor()
@@ -172,6 +184,7 @@ def indexlibro():
     dataautor = cur.fetchall()
     return render_template('libro.html', libro = datalibro, autor = dataautor)
 
+# AGREGA LIBRO
 @app.route('/add_libro', methods=['POST'])
 def add_libro():
     titulo = request.form['titulo'].strip()
@@ -191,6 +204,7 @@ def add_libro():
     
     return redirect(url_for('indexlibro'))
 
+# EXTRAE DATOS DE LIBRO
 @app.route('/edit_libro/<id>')
 def get_libro(id):
     cur = mysql.connection.cursor()
@@ -201,6 +215,7 @@ def get_libro(id):
 
     return render_template('edit-libro.html', libro = datalibro, autor = dataautor)
 
+# ACTUALIZA LIBRO
 @app.route('/update_libro/<id>', methods = ['POST'])
 def update_libro(id):
     titulo = request.form['titulo'].strip()
@@ -225,6 +240,7 @@ def update_libro(id):
         flash('El año ingresado no es valido', 'danger')
     return redirect(url_for('indexlibro'))
 
+# ELIMINA LIBRO
 @app.route('/delete_libro/<string:id>')
 def delete_libro(id):
     cur = mysql.connection.cursor()
@@ -233,7 +249,119 @@ def delete_libro(id):
     flash('Libro eliminado correctamente', 'success')
     return redirect(url_for('indexlibro'))
 
+# ------------------------------------------------------------------------------------------------
+# TABLA EJEMPLAR
+# RUTA PRINCIPAL DE EJEMPLAR
+@app.route('/ejemplar')
+def indexejemplar():
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        select e.ejemplar_id,
+            l.titulo,
+            e.num_copia,
+            e.estado
+        from ejemplar e
+        inner join libro l
+            on e.libro_id = l.libro_id
+    """)
+    dataejemplar = cur.fetchall()
+    cur.execute("""
+        select libro_id,
+            titulo
+        from libro
+    """)
+    datalibro = cur.fetchall()
+    return render_template('ejemplar.html', ejemplar=dataejemplar, libro = datalibro)
 
+# Metodo extra para obtener la proxima copia denum_copia
+@app.route('/get_next_copy/<int:libro_id>')
+def get_next_copy(libro_id):
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        select coalesce(max(num_copia), 0) +1
+        from ejemplar
+        where libro_id = %s
+    """, (libro_id,))
+
+    siguiente_copia = cur.fetchone()[0]
+    return {
+        'siguiente_copia': siguiente_copia
+    }
+
+# RUTA PARA AGREGAR EJEMPLAR
+@app.route('/add_ejemplar', methods=['POST'])
+def add_ejemplar():
+    libro_id = request.form['libro_id'].strip()
+    if not libro_id:
+        flash('Todos los campos son obligatorios', 'warning')
+        return redirect(url_for('indexejemplar'))
+    # CONTROL DE ERRORES
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            select coalesce(max(num_copia), 0)
+            from ejemplar
+            where libro_id = %s
+    """, (libro_id,))
+        ultima_copia = cur.fetchone()[0]
+        nueva_copia = ultima_copia+1
+        cur.execute('insert into ejemplar (libro_id, num_copia) values(%s, %s)', (libro_id, nueva_copia))
+        mysql.connection.commit()
+        flash('Ejemplar agregado correctamente', 'success')
+    except Exception:
+        mysql.connection.rollback()
+        flash('No se pudo registar el ejemplar', 'danger')
+    return redirect(url_for('indexejemplar'))
+
+# RUTA PARA OBTENER DATOS
+@app.route('/edit_ejemplar/<id>')
+def get_ejemplar(id):
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        select
+            e.ejemplar_id,
+            l.titulo,
+            e.num_copia,
+            e.estado
+        from ejemplar e
+        inner join libro l
+            on e.libro_id = l.libro_id
+        where e.ejemplar_id = %s
+    """, (id,))
+    dataejemplar = cur.fetchone()
+    return render_template('edit-ejemplar.html', ejemplar = dataejemplar)
+
+# RUTA PARA ACTUALIZAR
+@app.route('/update_ejemplar/<id>', methods = ['POST'])
+def update_ejemplar(id):
+    estado = request.form['estado'].strip()
+    if not estado:
+        flash('Debe seleccionar un estado', 'warning')
+        return redirect(url_for('indexejemplar'))
+
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute('update ejemplar set estado = %s where ejemplar_id = %s', (estado, id))
+        mysql.connection.commit()
+        flash('Estado actualizado correctamente', 'success')
+    except Exception:
+        # USO DE ROLLBACK PARA DESHACER CAMBIOS
+        mysql.connection.rollback()
+        flash('No se pudo actualizar', 'danger')
+    return redirect(url_for('indexejemplar'))
+
+# RUTA PARA ELIMINAR
+@app.route('/delete_ejemplar/<string:id>')
+def delete_ejemplar(id):
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute('delete from ejemplar where ejemplar_id = %s', (id,))
+        mysql.connection.commit()
+        flash('Ejemplar eliminado correctamente', 'success')
+    except Exception:
+        mysql.connection.rollback()
+        flash('No se pudo eliminar', 'danger')
+    return redirect(url_for('indexejemplar'))
 
 
 

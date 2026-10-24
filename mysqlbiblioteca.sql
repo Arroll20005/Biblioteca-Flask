@@ -41,7 +41,7 @@ constraint uq_libro_copia
 unique (libro_id, num_copia));
 
 create table prestamo (
-prestamo_id int not null, 
+prestamo_id int auto_increment primary key, 
 usuario_id int not null,
 ejemplar_id int not null, 
 fecha_prestamo date not null,
