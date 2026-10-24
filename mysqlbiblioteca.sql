@@ -45,7 +45,7 @@ prestamo_id int auto_increment primary key,
 usuario_id int not null,
 ejemplar_id int not null, 
 fecha_prestamo date not null,
-fecha_devolucion date not null,
+fecha_devolucion date,
 constraint fk_prestamo_usuario
 foreign key (usuario_id)
 references usuario(usuario_id)
@@ -69,5 +69,5 @@ select * from autor;
 select * from libro;
 select * from ejemplar;
 select * from prestamo;
-
+d;
 

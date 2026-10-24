@@ -363,6 +363,167 @@ def delete_ejemplar(id):
         flash('No se pudo eliminar', 'danger')
     return redirect(url_for('indexejemplar'))
 
+# ------------------------------------------------------------------------------------------------
+# TABLA PRESTAMO
+@app.route('/prestamo')
+def indexprestamo():
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        select p.prestamo_id,
+            u.nombre,
+            u.apellido,
+            l.titulo,
+            e.num_copia,
+            p.fecha_prestamo,
+            p.fecha_devolucion
+        from prestamo p
+        inner join usuario u
+            on p.usuario_id = u.usuario_id
+        inner join ejemplar e
+            on p.ejemplar_id = e.ejemplar_id 
+        inner join libro l
+            on e.libro_id = l.libro_id
+    """)
+    dataprestamo = cur.fetchall()
+    cur.execute("""
+        select usuario_id,
+            nombre, 
+            apellido
+        from usuario
+    """)
+    datausuario = cur.fetchall()
+    # PARA MOSTRAR A QUE LIBRO PERTENECE Y EVITAR PRESTAMOS NO DISPONIBLES (ES DECIR QUE HAYAN SIDO PRESTADOS)
+    cur.execute("""
+        select e.ejemplar_id,
+            l.titulo,
+            e.num_copia
+        from ejemplar e
+        inner join libro l
+            on e.libro_id = l.libro_id
+        where e.estado = 'Disponible'
+    """)
+    dataejemplar = cur.fetchall()
+    return render_template('prestamo.html', prestamo = dataprestamo, usuario = datausuario, ejemplar = dataejemplar)
+
+# AGREGAR PRESTAMO
+@app.route('/add_prestamo', methods=['POST'])
+def add_prestamo():
+    usuario_id = request.form['usuario_id'].strip()
+    ejemplar_id = request.form['ejemplar_id'].strip()
+    fecha_prestamo = request.form['fecha_prestamo'].strip()
+    if not usuario_id or not ejemplar_id or not fecha_prestamo:
+        flash('Todos los campos son obligatorios', 'warning')
+        return redirect(url_for('indexprestamo'))
+
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute('insert into prestamo (usuario_id, ejemplar_id, fecha_prestamo) values (%s, %s, %s)', (usuario_id, ejemplar_id, fecha_prestamo))
+        # ACTUALIZACION PARA ESTADO DEL EJEMPLAR
+        cur.execute("""
+            update ejemplar
+            set estado = 'Prestado'
+            where ejemplar_id = %s
+        """, (ejemplar_id,))
+
+        mysql.connection.commit()
+        flash('Prestamo agregado correctamente', 'success')
+    except Exception:
+        mysql.connection.rollback()
+        flash('No se pudo registrar el prestamo', 'danger')
+    return redirect(url_for('indexprestamo'))
+
+# EXTRAER PRESTAMO PARA ACTUALIZAR
+@app.route('/edit_prestamo/<id>')
+def get_prestamo(id):
+    cur = mysql.connection.cursor()
+    cur.execute("""
+        select p.prestamo_id,
+            p.ejemplar_id,
+            u.nombre,
+            u.apellido,
+            l.titulo,
+            e.num_copia,
+            p.fecha_prestamo,
+            p.fecha_devolucion
+        from prestamo p
+        inner join usuario u
+            on p.usuario_id = u.usuario_id
+        inner join ejemplar e
+            on p.ejemplar_id = e.ejemplar_id
+        inner join libro l
+            on e.libro_id = l.libro_id
+        where p.prestamo_id = %s
+    """, (id,))
+    dataprestamo = cur.fetchone()
+    return render_template('edit-prestamo.html', prestamo = dataprestamo)
+
+# ACTUALIZAR PRESTAMO
+@app.route('/update_prestamo/<id>', methods = ['POST'])
+def update_prestamo(id):
+    fecha_devolucion = request.form['fecha_devolucion'].strip()
+    ejemplar_id = request.form['ejemplar_id'].strip()
+    if not fecha_devolucion:
+        flash('Debe seleccionar una fecha', 'warning')
+        return redirect(url_for('indexprestamo'))
+
+    try:
+        cur = mysql.connection.cursor()
+
+        # CONSULTA PARA VALIDAD LA FECHA DE DEVOLUCION NO SEA MENOR A LA DEL PRESTAMO
+        cur.execute("""
+            select fecha_prestamo
+            from prestamo
+            where prestamo_id = %s
+        """, (id,))
+        fecha_prestamo = str(cur.fetchone()[0])
+
+        if fecha_devolucion < fecha_prestamo:
+            flash('La fecha de devolucion no puede ser menor que la fecha del préstamo', 'danger')
+            return redirect(url_for('indexprestamo'))
+
+        cur.execute('update prestamo set fecha_devolucion = %s where prestamo_id = %s', (fecha_devolucion, id))
+        # PARA ACTUALIZAR EL ESTADO DEL EJEMPLAR
+        cur.execute("""
+            update ejemplar
+            set estado = 'Disponible'
+            where ejemplar_id = %s
+        """, (ejemplar_id,))
+        mysql.connection.commit()
+        flash('Devolucion registrada correctamente', 'success')
+    except Exception:
+        mysql.connection.rollback()
+        flash('No se pudo registrar la devolucion', 'danger')
+    return redirect(url_for('indexprestamo'))
+
+# ELIMINAR PRESTAMO
+@app.route('/delete_prestamo/<string:id>')
+def delete_prestamo(id):
+    try:
+        cur = mysql.connection.cursor()
+        cur.execute("""
+            select ejemplar_id
+            from prestamo
+            where prestamo_id = %s
+        """, (id,))
+        ejemplar_id = cur.fetchone()[0]
+
+        # ACTUALIZA EL ESTADO DEL EJEMPLAR ANTES DEL ELIMINAR
+        # POR SI NO SE HA DEVUELTO
+        #PEQEUÑO MANEJO DE ERROR
+        cur.execute("""
+            update ejemplar
+            set estado = 'Disponible'
+            where ejemplar_id = %s
+        """, (ejemplar_id,))
+
+        # ELIMINA EL REGISTRO DEL PRESTAMO
+        cur.execute('delete from prestamo where prestamo_id = %s', (id,))
+        mysql.connection.commit()
+        flash('Prestamos eliminado correctamente', 'success')
+    except Exception:
+        mysql.connection.rollback()
+        flash('No se pudo eliminar el prestamo', 'danger')
+    return redirect(url_for('indexprestamo'))
 
 
 if __name__ == '__main__': 

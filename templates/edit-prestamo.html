@@ -1,0 +1,41 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="col-md-6 offset-md-3">
+    <div class="card card-body">
+        <h3 class="text-center">
+            Devolucion del Ejemplar
+        </h3>
+        <hr>
+        <form action="/update_prestamo/{{ prestamo.0 }}" method="POST">
+            <div class="form-group">
+                <input type="hidden" name="ejemplar_id" value="{{ prestamo.1 }}">
+                <label class="form-label">
+                    Usuario
+                </label>
+                <input type="text" class="form-control" value="{{ prestamo.2 }} {{ prestamo.3 }}" readonly>
+                <label class="form-label">
+                    Ejemplar
+                </label>
+                <input type="text" class="form-control" value="{{ prestamo.4 }} - Copia # {{ prestamo.5 }}" readonly>
+                <label class="form-label">
+                    Prestado
+                </label>
+                <input type="date" class="form-control" value="{{ prestamo.6 }}" readonly>
+                <label class="form-label">
+                    Devolucion
+                </label>
+                <input type="date" name="fecha_devolucion" class="form-control" value="{{ prestamo.7 }}" required >
+
+            </div>
+            <div class="form-group text-center">
+                <button type="submit" class="btn btn-primary w-100 mt-3">
+                    Save
+                </button>
+            </div>
+        </form>
+    </div>
+
+</div>
+
+{% endblock %}

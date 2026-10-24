@@ -2,7 +2,7 @@
 {% block body %}
 
 <div class="row">
-    <div class="col-md-5">
+    <div class="col-md-4">
         {% with messages = get_flashed_messages(with_categories = true) %}
         {% if messages %}
         {% for category, message in messages %}
@@ -43,7 +43,7 @@
             </form>
         </div>
     </div>
-    <div class="col-md-7">
+    <div class="col-md-8">
         <table class="table table-striped table-bordered bg-white table-sm">
             <thead>
                 <tr>
