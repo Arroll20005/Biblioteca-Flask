@@ -1,0 +1,85 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="card mb-3" >
+  <div class="row g-0" style="background-color: rgba(0, 110, 255, 0.274);">
+    <div class="col-md-2 text-center" style="color: rgba(0, 0, 255, 0.507);">
+      <i class="bi bi-book-fill" style="font-size: 5rem;"></i>
+
+    </div>
+    <div class="col-md-8">
+      <div class="card-body">
+        <h3 class="card-title fw-bold">Bienvenido a la Biblioteca</h3>
+        <p class="card-text">
+            Integrantes: <br>
+            Mero Morales Carlos <br>
+            Paz Manzaba Arlin
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row text-center" >
+    <div class="col-sm-3" style="margin-top: 20px; cursor: pointer;">
+        <div class="card " style="background-color: rgba(38, 196, 245, 0.568);">
+            <a href="/usuario" class="stretched-link text-reset" style="text-decoration: none;">
+                <div class="card-body">
+                    <i class="bi bi-people fs-1"></i>
+                    <h4 class="card-title fw-bold">Usuarios</h4>
+                    <p class="card-text">Gestionar usuarios</p>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="col-sm-3" style="margin-top: 20px; cursor: pointer;">
+        <div class="card " style="background-color: rgba(30, 243, 83, 0.671);">
+            <a href="/autor" class="stretched-link text-reset" style="text-decoration: none;">
+                <div class="card-body">
+                    <i class="bi bi-person fs-1"></i>
+                    <h5 class="card-title fw-bold">Autores</h5>
+                    <p class="card-text">Gestionar autores</p>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="col-sm-3" style="margin-top: 20px; cursor: pointer;">
+        <div class="card " style="background-color: rgba(105, 117, 228, 0.562);">
+            <a href="/libro" class="stretched-link text-reset" style="text-decoration: none;">
+                <div class="card-body">
+                    <i class="bi bi-journal-bookmark fs-1"></i>
+                    <h5 class="card-title fw-bold">Libros</h5>
+                    <p class="card-text">Gestionar libro</p>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="col-sm-3" style="margin-top: 20px; cursor: pointer;">
+        <div class="card " style="background-color: rgba(238, 160, 16, 0.562);">
+            <a href="/ejemplar" class="stretched-link text-reset" style="text-decoration: none;">
+                <div class="card-body">
+                    <i class="bi bi-file-text fs-1"></i>
+                    <h5 class="card-title fw-bold">Ejemplares</h5>
+                    <p class="card-text">Gestionar ejemplares</p>
+                </div>
+            </a>
+        </div>
+    </div>
+    <div class="col-sm-3" style="margin-top: 20px; cursor: pointer;">
+        <div class="card " style="background-color: rgba(236, 76, 76, 0.801);">
+            <a href="/prestamo" class="stretched-link text-reset" style="text-decoration: none;">
+                <div class="card-body">
+                    <i class="bi bi-calendar-date fs-1"></i>
+                    <h5 class="card-title fw-bold">Prestamos</h5>
+                    <p class="card-text">Gestionar prestamos</p>
+                </div>
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
+
+
+
+{% endblock %}

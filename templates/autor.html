@@ -4,10 +4,10 @@
 
 <div class="row">
     <div class="col-md-5">
-        {% with messages = get_flashed_messages() %}
+        {% with messages = get_flashed_messages(with_categories = true) %}
         {% if messages %}
-        {% for message in messages %}
-        <div class="alert alert-dismissible alert-success">
+        {% for category, message in messages %}
+        <div class="alert alert-{{category}} alert-dismissible fade show">
             <button type="button" class="btn-close" data-bs-dismiss="alert">
             </button>
             {{message}}
